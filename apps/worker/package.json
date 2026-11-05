@@ -1,0 +1,18 @@
+{
+  "name": "@selleros/worker",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx watch --env-file=../../.env src/main.ts",
+    "build": "tsc -p tsconfig.build.json",
+    "start": "node --env-file=../../.env dist/main.js",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@selleros/shared": "workspace:*",
+    "pino": "^10.0.0",
+    "zod": "^4.1.0",
+    "redis": "^5.10.0"
+  }
+}

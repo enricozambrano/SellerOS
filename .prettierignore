@@ -1,0 +1,10 @@
+node_modules
+dist
+coverage
+pnpm-lock.yaml
+.env
+.env.*
+!.env.example
+# Preserve the original product specification and SQL proposal.
+docs/0*.md
+database/001_initial.sql
