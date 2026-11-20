@@ -1,0 +1,24 @@
+name: selleros-test
+services:
+  postgres-test:
+    image: postgres:17-alpine
+    environment:
+      POSTGRES_DB: ${TEST_POSTGRES_DB:?Configure .env.test}
+      POSTGRES_USER: ${TEST_POSTGRES_USER:?Configure .env.test}
+      POSTGRES_PASSWORD: ${TEST_POSTGRES_PASSWORD:?Configure .env.test}
+    ports:
+      - '127.0.0.1:${TEST_POSTGRES_PORT:?Configure .env.test}:5432'
+    volumes:
+      - postgres_test_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U "$$POSTGRES_USER" -d "$$POSTGRES_DB"']
+      interval: 2s
+      timeout: 3s
+      retries: 20
+      start_period: 5s
+    restart: 'no'
+    stop_grace_period: 30s
+volumes:
+  postgres_test_data:
+    labels:
+      com.selleros.purpose: integration-tests-only
