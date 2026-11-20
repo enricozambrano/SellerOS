@@ -130,13 +130,16 @@ Princípios preservados: isolamento por organização, Mercado Livre inicialment
 
 A modelagem aprovada está em [docs/12](docs/12-etapa-02a-modelagem-revisada.md).
 A [preparação de persistência](docs/13-etapa-02b0-persistencia.md) adiciona PostgreSQL
-17 de testes isolado e Prisma 7.10.1, ainda sem entidades/migrations. API e worker
+17 de testes isolado e Prisma 7.10.1. A 02B.1 acrescenta somente identidade e
+isolamento, conforme a seção seguinte. API e worker
 continuam sem acesso ao domínio persistido.
 
 ```bash
 pnpm db:test:setup # primeira vez; gera .env.test privado sem sobrescrever
 pnpm db:test:up
 pnpm db:test:check
+pnpm db:test:enroll # somente no primeiro enrollment da instância
+pnpm db:test:roles
 pnpm db:validate
 pnpm db:test:prisma
 pnpm db:typecheck
@@ -150,3 +153,22 @@ falha por AppArmor; o caminho seguro validado é encerrar PostgreSQL primeiro e
 remover o container parado depois. A correção global do host continua pendente,
 conforme o diagnóstico em docs/13. Nunca executar reset/db push ou testes
 destrutivos no banco de desenvolvimento. Não iniciar entidades/RLS sem autorização.
+
+## Identidade e isolamento — Etapa 02B.1
+
+A primeira migration implementa somente usuários internos, organizações e memberships.
+O [relatório de isolamento](docs/14-etapa-02b1-isolamento.md) documenta roles,
+policies, bootstrap, resultados e limites. API/web ainda não expõem esses dados.
+
+Depois do ciclo seguro do PostgreSQL de testes, faça enrollment explícito da
+instância na primeira execução (`pnpm db:test:enroll`), verifique
+`pnpm db:test:identity`, provisione `pnpm db:test:roles` e execute
+`pnpm db:migrate:deploy:test`. O deploy confere identidade persistente do cluster,
+container, volume, banco, login migrador e versão antes de aplicar SQL.
+Não sobrescreva o pin para contornar divergência. Não há banco shadow nesta fatia.
+
+`pnpm test:isolation` roda a prova SQL/Prisma com credenciais de execução sem
+superusuário/BYPASSRLS; cria e remove fixtures somente no banco de testes.
+Executar essa suíte de forma serial, depois do deploy. Os arquivos locais
+`.env.test.identity` e `.env.test.roles` são privados/ignorados, como `.env.test`.
+Ao terminar: `pnpm db:test:stop-postgres` e `pnpm db:test:down`, preservando volumes.

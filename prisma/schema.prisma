@@ -1,4 +1,3 @@
-// Etapa 02B.0: infraestrutura somente; entidades dependem da Etapa 02B.1.
 generator client {
   provider     = "prisma-client"
   output       = "../generated/prisma"
@@ -7,4 +6,79 @@ generator client {
 
 datasource db {
   provider = "postgresql"
+}
+
+enum AppUserStatus {
+  active
+  disabled
+  anonymized
+
+  @@map("app_user_status")
+}
+
+enum OrganizationStatus {
+  active
+  suspended
+  pending_deletion
+
+  @@map("organization_status")
+}
+
+enum MemberRole {
+  owner
+  admin
+  operator
+  viewer
+
+  @@map("member_role")
+}
+
+enum MemberStatus {
+  active
+  inactive
+
+  @@map("member_status")
+}
+
+model AppUser {
+  id          String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  authIssuer  String?              @map("auth_issuer")
+  authSubject String?              @map("auth_subject")
+  email       String?
+  name        String?
+  status      AppUserStatus
+  createdAt   DateTime             @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt   DateTime             @default(now()) @map("updated_at") @db.Timestamptz(6)
+  memberships OrganizationMember[]
+
+  @@unique([authIssuer, authSubject])
+  @@map("app_users")
+}
+
+model Organization {
+  id           String               @id @default(dbgenerated("gen_random_uuid()")) @db.Uuid
+  name         String
+  currencyCode String               @default("BRL") @map("currency_code") @db.Char(3)
+  timezone     String               @default("America/Sao_Paulo")
+  status       OrganizationStatus
+  createdAt    DateTime             @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt    DateTime             @default(now()) @map("updated_at") @db.Timestamptz(6)
+  members      OrganizationMember[]
+
+  @@map("organizations")
+}
+
+model OrganizationMember {
+  organizationId String       @map("organization_id") @db.Uuid
+  userId         String       @map("user_id") @db.Uuid
+  role           MemberRole
+  status         MemberStatus
+  joinedAt       DateTime     @default(now()) @map("joined_at") @db.Timestamptz(6)
+  updatedAt      DateTime     @default(now()) @map("updated_at") @db.Timestamptz(6)
+  organization   Organization @relation(fields: [organizationId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+  user           AppUser      @relation(fields: [userId], references: [id], onDelete: Restrict, onUpdate: Restrict)
+
+  @@id([organizationId, userId])
+  @@index([userId, status, organizationId])
+  @@map("organization_members")
 }

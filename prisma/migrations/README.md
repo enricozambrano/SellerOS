@@ -1,10 +1,17 @@
-# Trilha futura de migrations
+# Trilha única de migrations
 
-Nenhuma migration foi criada nesta etapa. Este diretório é a única trilha futura
-Prisma Migrate; `database/001_initial.sql` permanece referência não executável.
+`202611200001_identity` contém apenas app_users, organizations e organization_members.
+O SQL base foi gerado por Prisma Migrate diff entre vazio e schema; o mesmo arquivo
+recebeu constraints, triggers, RLS, funções e grants revisados, em uma transação.
+Não houve db push ou aplicação de database/001_initial.sql.
 
-Após autorização da 02B.1, gerar uma migration revisável em ambiente isolado,
-revisar SQL e incluir constraints/RLS antes de aplicar. Nunca usar `db push` ou
-reset no banco de desenvolvimento. `pnpm db:migrate:deploy:test` aplica somente
-migrations já revisadas ao destino de testes validado; não gera migrations.
-O banco shadow para autoria de migrations ainda será definido na 02B.1.
+Provisionar roles técnicas no cluster fixado antes de deploy. Não conceder
+credenciais de migração a API/worker. O comando `pnpm db:migrate:deploy:test`
+confere identidade do cluster, container, volume, banco, usuário e versão antes
+de chamar Prisma Migrate; roles/login e chaves são configuração de ambiente,
+não dados de negócio. A migration supõe os nomes documentados no relatório 02B.1.
+
+Esta etapa não usa banco shadow: geração via diff `--from-empty` e deploy de SQL
+revisado. Nunca executar migrate dev/reset no banco de desenvolvimento.
+Migrations aplicadas são imutáveis; correções futuras exigem nova migration.
+Toda customização SQL deve permanecer no histórico, inclusive policies/triggers.

@@ -36,7 +36,12 @@
     "db:migrate:deploy:test": "node scripts/test-db.mjs migrate-deploy",
     "test:db-config": "node scripts/test-db-config.test.mjs",
     "db:test:prisma": "pnpm db:generate && tsx scripts/prisma-check.mts",
-    "db:typecheck": "pnpm db:generate && tsc -p tsconfig.persistence.json"
+    "db:typecheck": "pnpm db:generate && tsc -p tsconfig.persistence.json",
+    "db:test:enroll": "node scripts/test-db.mjs enroll",
+    "db:test:identity": "node scripts/test-db.mjs identity",
+    "db:test:roles": "node scripts/test-db.mjs roles",
+    "db:test:preflight": "node scripts/test-db.mjs preflight",
+    "test:isolation": "pnpm db:generate && tsx tests/integration/isolation.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^10.0.1",

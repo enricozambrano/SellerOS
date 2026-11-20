@@ -2,6 +2,8 @@ import { spawnSync } from 'node:child_process';
 import { writeFileSync } from 'node:fs';
 import { randomBytes } from 'node:crypto';
 import pg from 'pg';
+import { enrollInstance, verifyInstance } from './test-instance.mjs';
+import { provisionRoles, verifyMigrationTarget, roleConfig } from './test-roles.mjs';
 import { root, readTestConfig } from './test-db-config.mjs';
 
 function run(command, args, config, allowFailure = false) {
@@ -52,7 +54,13 @@ async function main() {
     '-f',
     'infra/docker-compose.test.yml',
   ];
-  if (action === 'up')
+  if (action === 'enroll') await enrollInstance();
+  else if (action === 'identity') {
+    await verifyInstance();
+    console.log('Identidade do cluster de testes confirmada.');
+  } else if (action === 'roles') await provisionRoles();
+  else if (action === 'preflight') await verifyMigrationTarget();
+  else if (action === 'up')
     run('docker', [...compose, 'up', '-d', '--wait', '--wait-timeout', '60'], config);
   else if (action === 'status') run('docker', [...compose, 'ps', '-a'], config);
   else if (action === 'down') run('docker', [...compose, 'down', '--timeout', '30'], config);
@@ -134,7 +142,9 @@ async function main() {
     };
     if (!Object.hasOwn(commands, action))
       throw new Error('Ação não permitida. db push/reset não são expostos.');
-    run('pnpm', ['exec', 'prisma', ...commands[action], '--config', 'prisma.config.ts'], config);
+    if (action === 'migrate-deploy' || action === 'migrate-status') await verifyMigrationTarget();
+    const migration = roleConfig('migration');
+    run('pnpm', ['exec', 'prisma', ...commands[action], '--config', 'prisma.config.ts'], migration);
   }
 }
 main().catch(() => {
