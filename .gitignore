@@ -48,3 +48,6 @@ credentials/
 .npmrc.local
 .netrc
 .git-credentials
+
+# Prisma generated client (no domain models in 02B.0)
+/generated/

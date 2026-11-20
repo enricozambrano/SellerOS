@@ -125,3 +125,28 @@ Leia `docs/01` a `docs/09` para contexto de produto, requisitos, design, arquite
 O Sprint 0 e o prompt antigo em `docs/07` e `docs/08` incluem itens que **foram explicitamente adiados** pelo pedido da Etapa 01: autenticação, Prisma/schema, migrations, seed e domínio. `database/001_initial.sql` é somente referência e não deve ser aplicado antes de revisão e autorização.
 
 Princípios preservados: isolamento por organização, Mercado Livre inicialmente somente leitura, importações idempotentes, estoque interno separado do marketplace, sem baixa por importações históricas, custos desconhecidos como NULL, snapshots históricos e margem estimada com faltas visíveis. Não iniciar Etapa 02 ou modelagem sem autorização.
+
+## Persistência — preparação 02B.0
+
+A modelagem aprovada está em [docs/12](docs/12-etapa-02a-modelagem-revisada.md).
+A [preparação de persistência](docs/13-etapa-02b0-persistencia.md) adiciona PostgreSQL
+17 de testes isolado e Prisma 7.10.1, ainda sem entidades/migrations. API e worker
+continuam sem acesso ao domínio persistido.
+
+```bash
+pnpm db:test:setup # primeira vez; gera .env.test privado sem sobrescrever
+pnpm db:test:up
+pnpm db:test:check
+pnpm db:validate
+pnpm db:test:prisma
+pnpm db:typecheck
+pnpm db:test:stop-postgres # shutdown limpo; requer clientes desconectados
+pnpm db:test:down # preserva o volume de testes
+```
+
+O teste usa projeto `selleros-test`, porta 55432 e volume próprios, sem reutilizar
+DATABASE_URL de desenvolvimento. Neste host, a parada normal do Docker Snap
+falha por AppArmor; o caminho seguro validado é encerrar PostgreSQL primeiro e
+remover o container parado depois. A correção global do host continua pendente,
+conforme o diagnóstico em docs/13. Nunca executar reset/db push ou testes
+destrutivos no banco de desenvolvimento. Não iniciar entidades/RLS sem autorização.

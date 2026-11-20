@@ -5,7 +5,7 @@ import hooks from 'eslint-plugin-react-hooks';
 import refresh from 'eslint-plugin-react-refresh';
 import prettier from 'eslint-config-prettier';
 export default tseslint.config(
-  { ignores: ['**/node_modules/**', '**/dist/**', '**/coverage/**'] },
+  { ignores: ['**/node_modules/**', '**/dist/**', '**/coverage/**', 'generated/**'] },
   js.configs.recommended,
   ...tseslint.configs.recommended,
   { languageOptions: { globals: globals.node } },

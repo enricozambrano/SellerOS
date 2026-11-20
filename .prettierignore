@@ -8,3 +8,5 @@ pnpm-lock.yaml
 # Preserve the original product specification and SQL proposal.
 docs/0*.md
 database/001_initial.sql
+
+/generated/

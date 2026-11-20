@@ -6,3 +6,5 @@ engineStrict: true
 saveExact: true
 allowBuilds:
   esbuild: true
+  '@prisma/engines': true
+  prisma: true

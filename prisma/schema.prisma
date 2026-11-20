@@ -1,0 +1,10 @@
+// Etapa 02B.0: infraestrutura somente; entidades dependem da Etapa 02B.1.
+generator client {
+  provider     = "prisma-client"
+  output       = "../generated/prisma"
+  moduleFormat = "esm"
+}
+
+datasource db {
+  provider = "postgresql"
+}
