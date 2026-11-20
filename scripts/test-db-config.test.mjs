@@ -48,3 +48,18 @@ test('rejects malformed development URL without leaking it', () => {
     message: 'DATABASE_URL de desenvolvimento inválida; isolamento não comprovado.',
   });
 });
+
+test('instance pin requires cluster identity, database OID and volume, not just a URL', async () => {
+  const { sameIdentity } = await import('./test-instance.mjs');
+  const identity = {
+    systemIdentifier: '100',
+    database: 'selleros_integration_test',
+    databaseOid: '16384',
+    user: 'selleros_integration_test',
+    versionMajor: 17,
+    volume: 'selleros-test_postgres_test_data',
+  };
+  assert.equal(sameIdentity(identity, { ...identity }), true);
+  for (const field of Object.keys(identity))
+    assert.equal(sameIdentity(identity, { ...identity, [field]: 'changed' }), false);
+});
